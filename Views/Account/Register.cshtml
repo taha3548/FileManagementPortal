@@ -1,0 +1,56 @@
+@model FileManagementPortal.ViewModels.LoginViewModel
+@{
+    ViewData["Title"] = "Kayıt Ol";
+    ViewData["HideLayoutAlerts"] = true;
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow-sm mt-4">
+            <div class="card-body">
+                <h4 class="card-title mb-3">Kayıt Ol</h4>
+                
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert alert-danger">
+                        <i class="bi bi-exclamation-triangle me-2"></i>@TempData["ErrorMessage"]
+                    </div>
+                }
+                
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="alert alert-danger">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                        {
+                            <span>@error.ErrorMessage</span>
+                        }
+                    </div>
+                }
+                
+                <form asp-action="Register" method="post">
+                    <div class="mb-3">
+                        <label for="Email" class="form-label">E-posta</label>
+                        <input type="email" name="Email" class="form-control" placeholder="ornek@email.com" required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="Password" class="form-label">Şifre</label>
+                        <input type="password" name="Password" class="form-control" placeholder="••••••" required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="ConfirmPassword" class="form-label">Şifreyi Onayla</label>
+                        <input type="password" name="ConfirmPassword" class="form-control" placeholder="••••••" required />
+                    </div>
+                    <button type="submit" class="btn btn-success w-100">Kayıt Ol</button>
+                </form>
+                <div class="mt-3 text-center">
+                    <p>Zaten hesabınız var mı? <a asp-action="Login">Giriş Yapın</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

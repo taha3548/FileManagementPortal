@@ -1,0 +1,72 @@
+@model FileManagementPortal.ViewModels.CategoryViewModel
+@{
+    ViewData["Title"] = "Yeni Kategori Oluştur";
+}
+
+<!-- Admin Category Creation Page -->
+<!-- AdminController.CreateCategory (GET) action sends an empty CategoryViewModel to this view -->
+<!-- Admin fills out this form to create a new category -->
+<!-- [Authorize(Roles = "Admin")] allows only admin users to access -->
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0">
+            <!-- Form header -->
+            <div class="card-header bg-success text-white">
+                <h4 class="mb-0"><i class="bi bi-plus-circle me-2"></i>Yeni Kategori Oluştur</h4>
+            </div>
+            <div class="card-body">
+                <!-- Category creation form -->
+                <!-- asp-action="CreateCategory": POST operation goes to AdminController.CreateCategory action -->
+                <form asp-action="CreateCategory" method="post">
+                    <!-- Model validation errors (ModelOnly: general errors, not property errors) -->
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+                    
+                    <!-- Category name input field -->
+                    <!-- Bound to CategoryViewModel.Name property -->
+                    <!-- Required validation: [Required] attribute in CategoryViewModel -->
+                    <div class="mb-3">
+                        <label asp-for="Name" class="form-label">Kategori Adı</label>
+                        <input asp-for="Name" class="form-control" placeholder="Kategori adını girin" />
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+                    
+                    <!-- Category description textarea field -->
+                    <!-- Bound to CategoryViewModel.Description property -->
+                    <!-- Optional field, can be left empty -->
+                    <div class="mb-3">
+                        <label asp-for="Description" class="form-label">Açıklama</label>
+                        <textarea asp-for="Description" class="form-control" rows="3" placeholder="Kategori açıklaması (isteğe bağlı)"></textarea>
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </div>
+                    
+                    <!-- Active/Inactive status checkbox -->
+                    <!-- Bound to CategoryViewModel.IsActive property -->
+                    <!-- checked: Default is active (true) -->
+                    <!-- Inactive categories are not shown in file upload forms -->
+                    <div class="mb-3 form-check">
+                        <input asp-for="IsActive" class="form-check-input" type="checkbox" checked />
+                        <label asp-for="IsActive" class="form-check-label">Aktif</label>
+                    </div>
+                    
+                    <!-- Form buttons -->
+                    <div class="d-flex gap-2">
+                        <!-- Form submit button -->
+                        <!-- Sends to AdminController.CreateCategory (POST) action -->
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-save me-2"></i>Kaydet
+                        </button>
+                        <!-- Cancel button - Returns to category list page -->
+                        <a asp-action="Categories" class="btn btn-secondary">
+                            <i class="bi bi-x-circle me-2"></i>İptal
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

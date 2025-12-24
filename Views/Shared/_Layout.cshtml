@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- HTML Head Section -->
+    <!-- Common head content for all pages -->
+    
+    <!-- Meta Tags -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- Page Title -->
+    <!-- ViewData["Title"]: Different title set on each page -->
+    <title>@ViewData["Title"] - Dosya Yönetim Portalı</title>
+    
+    <!-- Bootstrap 5.3 CSS - Loaded from CDN -->
+    <!-- Bootstrap grid system, components, utilities -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    
+    <!-- Bootstrap Icons - Loaded from CDN -->
+    <!-- Icons like bi bi-upload, bi bi-files -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <!-- Google Fonts - Preconnect (for performance) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- Google Fonts - Inter font family -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Google Fonts - Poppins and Montserrat font families -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Site CSS - Custom styles -->
+    <!-- asp-append-version: Cache busting (version changes when file changes) -->
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <!-- Custom CSS Styles -->
+    <!-- Custom styles for input fields (design requirements) -->
+    <style>
+        /* FORCE WHITE BACKGROUND FOR ALL INPUTS - NO RED BORDER */
+        /* Prevent unwanted red borders in forms -->
+        /* White background forced for all input, textarea, select elements -->
+        input, textarea, select, .form-control, div.form-control,
+        input[type="email"], input[type="text"], input[type="password"],
+        input[type="number"], input[type="tel"], input[type="url"],
+        .card-body input, .card-body .form-control, .card-body div.form-control,
+        .manage-layout input, .manage-layout .form-control, .manage-layout div.form-control,
+        #email-form input, #email-form .form-control,
+        .col-md-9 input, .col-md-9 .form-control, .col-md-9 div.form-control,
+        input#Input_NewEmail, input[name="Input.NewEmail"] {
+            background: #ffffff !important;
+            background-color: #ffffff !important;
+            background-image: none !important;
+            background-size: auto !important;
+            background-position: 0 0 !important;
+            background-repeat: no-repeat !important;
+            border-color: rgba(16, 185, 129, 0.4) !important; /* Green border (design requirement) */
+        }
+        
+        /* White background for invalid inputs (green border instead of red) */
+        /* Validation errors show green border instead of red -->
+        input.is-invalid, .form-control.is-invalid, input:invalid, .form-control:invalid,
+        .was-validated input:invalid, .was-validated .form-control:invalid,
+        input.input-validation-error, .form-control.input-validation-error,
+        input[type="email"].is-invalid, input[type="text"].is-invalid {
+            background: #ffffff !important;
+            background-color: #ffffff !important;
+            background-image: none !important;
+            background-size: auto !important;
+            border-color: rgba(16, 185, 129, 0.4) !important; /* Green border instead of red */
+            padding-right: 1.5rem !important;
+            box-shadow: none !important;
+        }
+        
+        /* Green border and shadow on focus -->
+        input:focus, .form-control:focus, input.is-invalid:focus, .form-control.is-invalid:focus {
+            background: #ffffff !important;
+            background-color: #ffffff !important;
+            background-image: none !important;
+            border-color: #10b981 !important; /* Green focus border */
+            box-shadow: 0 0 0 0.25rem rgba(16, 185, 129, 0.25) !important;
+        }
+        
+        /* Hide validation error messages (only validation-summary shown) -->
+        /* Field-level error messages hidden, only general error messages shown -->
+        .field-validation-error,
+        .text-danger[data-valmsg-for],
+        span[data-valmsg-for],
+        .text-danger.validation-message {
+            display: none !important;
+            visibility: hidden !important;
+        }
+        
+        /* Hide empty validation-summary only (no errors) -->
+        /* validation-summary-valid: Should not be shown if no errors -->
+        .validation-summary-valid,
+        .alert.alert-danger.validation-summary-valid,
+        div.validation-summary-valid {
+            display: none !important;
+            visibility: hidden !important;
+            height: 0 !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            border: none !important;
+        }
+        
+        /* Show actual errors (validation-summary-errors) -->
+        /* validation-summary-errors: Should be shown if errors exist -->
+        .validation-summary-errors,
+        .alert.alert-danger.validation-summary-errors {
+            display: block !important;
+            visibility: visible !important;
+        }
+    </style>
+    <!-- JavaScript: Force white background for all inputs -->
+    <!-- For dynamically added inputs -->
+    <!-- MutationObserver monitors DOM changes, applies white background when new inputs added -->
+    <script>
+        // FORCE WHITE BACKGROUND FOR ALL INPUTS (Optimized version)
+        // IIFE (Immediately Invoked Function Expression) - to avoid polluting global scope
+        (function() {
+            let isRunning = false; // Flag to prevent multiple calls
+            
+            // Apply white background to all inputs
+            function forceWhite() {
+                if (isRunning) return; // If already running, wait
+                isRunning = true;
+                try {
+                    // Find all input, textarea, select elements
+                    const all = document.querySelectorAll('input, textarea, select, .form-control');
+                    all.forEach(el => {
+                        // Update only if not white (for performance)
+                        const bg = window.getComputedStyle(el).backgroundColor;
+                        if (bg && !bg.includes('rgb(255, 255, 255)') && !bg.includes('#ffffff')) {
+                            // Force white background (override with important)
+                            el.style.setProperty('background', '#ffffff', 'important');
+                            el.style.setProperty('background-color', '#ffffff', 'important');
+                            el.style.setProperty('background-image', 'none', 'important');
+                        }
+                    });
+                } catch(e) {
+                    console.error('Force white error:', e);
+                }
+                isRunning = false;
+            }
+            
+            // Run when DOM is ready
+            if (document.readyState === 'loading') {
+                // DOM still loading, wait for DOMContentLoaded event
+                document.addEventListener('DOMContentLoaded', function() {
+                    forceWhite();
+                    setTimeout(forceWhite, 100); // Check again after 100ms
+                    setTimeout(forceWhite, 500); // Check again after 500ms
+                });
+            } else {
+                // DOM already ready, run immediately
+                forceWhite();
+                setTimeout(forceWhite, 100);
+                setTimeout(forceWhite, 500);
+            }
+            
+            // Monitor DOM changes (MutationObserver)
+            // Automatically apply white background when new input elements added
+            // Inputs can be added dynamically
+            const observer = new MutationObserver(function(mutations) {
+                let hasInputs = false;
+                mutations.forEach(function(mutation) {
+                    if (mutation.addedNodes.length > 0) {
+                        mutation.addedNodes.forEach(function(node) {
+                            // Is new added node an input or contains inputs?
+                            if (node.nodeType === 1 && (node.tagName === 'INPUT' || node.tagName === 'TEXTAREA' || node.tagName === 'SELECT' || node.querySelector && node.querySelector('input, textarea, select'))) {
+                                hasInputs = true;
+                            }
+                        });
+                    }
+                });
+                // If new input added, apply white background
+                if (hasInputs) {
+                    setTimeout(forceWhite, 50);
+                }
+            });
+            // Monitor all changes in body (childList: add/remove children, subtree: sub-nodes)
+            // Wait until body is ready
+            if (document.body) {
+                observer.observe(document.body, { childList: true, subtree: true });
+            } else {
+                // Body not ready yet, try again on DOMContentLoaded
+                document.addEventListener('DOMContentLoaded', function() {
+                    if (document.body) {
+            observer.observe(document.body, { childList: true, subtree: true });
+                    }
+                });
+            }
+        })();
+    </script>
+    <link rel="stylesheet" href="~/FileManagementPortal.styles.css" asp-append-version="true" />
+</head>
+<body class="d-flex flex-column min-vh-100">
+    <!-- Floating Stars/Sparkles Background -->
+    <div class="stars-container">
+        <div class="star"></div>
+        <div class="star"></div>
+        <div class="star"></div>
+        <div class="star"></div>
+        <div class="star"></div>
+        <div class="star"></div>
+        <div class="star"></div>
+        <div class="star"></div>
+        <div class="star"></div>
+        <div class="star"></div>
+        <div class="star"></div>
+        <div class="star"></div>
+        <div class="star"></div>
+        <div class="star"></div>
+        <div class="star"></div>
+        <div class="star"></div>
+        <div class="star"></div>
+        <div class="star"></div>
+        <div class="star"></div>
+        <div class="star"></div>
+    </div>
+    
+    <!-- Navigation Header -->
+    <!-- Bootstrap navbar component - displayed on all pages -->
+    <!-- Note: This menu is the backbone of all pages -->
+    <header>
+        <nav class="navbar navbar-expand-lg">
+            <div class="container-fluid">
+                <!-- Site logo/brand - Navigate to home page -->
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index" style="font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 1.1rem; letter-spacing: 0.5px;">
+                    <i class="bi bi-cloud-upload"></i> Dosya Yönetim Portalı
+                </a>
+                
+                <!-- Mobile menu toggle button (hamburger menu) -->
+                <!-- Bootstrap collapse component -->
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                
+                <!-- Navigation menu content (left side links, right side user section) -->
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto">
+                <!-- Home link - Everyone can see -->
+                <li class="nav-item">
+                    <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">
+                        <i class="bi bi-house"></i> Anasayfa
+                    </a>
+                </li>
+                        
+                        <!-- Menu items for authenticated users -->
+                        <!-- User.Identity?.IsAuthenticated: Check if user is authenticated -->
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <!-- My Files link - Navigate to FileController.Index page -->
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="" asp-controller="File" asp-action="Index">
+                                    <i class="bi bi-files"></i> Dosyalarım
+                                </a>
+                            </li>
+                            <!-- Upload File link - Navigate to FileController.Create page -->
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="" asp-controller="File" asp-action="Create">
+                                    <i class="bi bi-upload"></i> Dosya Yükle
+                                </a>
+                            </li>
+                        }
+                        
+                        <!-- Menu items for admin users -->
+                        <!-- User.IsInRole("Admin"): Check if user has Admin role -->
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <!-- Admin Dashboard link - Navigate to AdminController.Dashboard page -->
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="" asp-controller="Admin" asp-action="Dashboard">
+                                    <i class="bi bi-speedometer2"></i> Admin Paneli
+                                </a>
+                            </li>
+                            <!-- Manage Users link - Navigate to AdminController.Users page -->
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="" asp-controller="Admin" asp-action="Users">
+                                    <i class="bi bi-people"></i> Kullanıcı Yönetimi
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                    
+                    <!-- Login/Logout partial view - Sağ tarafta gösteriliyor -->
+                    <!-- _LoginPartial.cshtml render ediliyor -->
+                    <partial name="_LoginPartial" />
+                </div>
+            </div>
+        </nav>
+    </header>
+    
+    <!-- Hide English titles and force Turkish -->
+    <!-- English titles may appear in scaffold pages, we hide them -->
+    <style>
+        /* Hide English titles (CSS :has-text pseudo-class - may not work in all browsers) */
+        h1:has-text("Manage your account"),
+        h2:has-text("Manage your account"),
+        h1:has-text("Change your account settings"),
+        h2:has-text("Change your account settings") {
+            display: none !important;
+        }
+    </style>
+    <script>
+        // Hide English titles with JavaScript
+        // Hide English titles that may appear in scaffold pages
+        (function() {
+            function hideEnglishTitles() {
+                // Find all heading elements
+                const headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
+                headings.forEach(h => {
+                    const text = h.textContent || h.innerText;
+                    // Check for English heading text
+                    if (text.includes('Manage your account') || 
+                        text.includes('Change your account settings')) {
+                        // Hide English heading
+                        h.style.display = 'none';
+                    }
+                });
+            }
+            // Run immediately
+            hideEnglishTitles();
+            // Run again when DOM is ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', hideEnglishTitles);
+            }
+            // Check again after 100ms (for dynamic content)
+            setTimeout(hideEnglishTitles, 100);
+        })();
+    </script>
+    
+    <!-- Main Content Section -->
+    <div class="container my-4 flex-grow-1" style="position: relative; z-index: 10;">
+        @if (ViewData["HideLayoutAlerts"] == null)
+        {
+            if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="bi bi-check-circle me-2"></i>@TempData["SuccessMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Kapat"></button>
+                </div>
+            }
+            
+            if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="bi bi-exclamation-triangle me-2"></i>@TempData["ErrorMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Kapat"></button>
+                </div>
+            }
+        }
+        
+        <main role="main" style="position: relative; z-index: 10;">
+            @RenderBody()
+        </main>
+    </div>
+
+    <!-- Footer Section -->
+    <!-- Footer displayed at the bottom of the page -->
+    <footer class="mt-auto" style="padding: 1rem 0; font-size: 0.85rem;">
+        <div class="container">
+            <div class="row">
+                <!-- Left side - Site name -->
+                <div class="col-md-6">
+                    <h6 class="mb-0" style="font-size: 0.95rem; font-weight: 600;"><i class="bi bi-cloud-upload me-2"></i>Dosya Yönetim Portalı</h6>
+                </div>
+                <!-- Right side - Copyright info -->
+                <div class="col-md-6 text-md-end">
+                    <p class="mb-0" style="font-size: 0.8rem; opacity: 0.8;">&copy; @DateTime.Now.Year - Tüm hakları saklıdır.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Hidden Logout Form -->
+    <!-- The "Logout" link in _LoginPartial.cshtml submits this form -->
+    <!-- Hidden form created for authenticated users -->
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <!-- Cookie auth logout -->
+        <form id="logoutForm" asp-controller="Account" asp-action="Logout" method="post" style="display: none;">
+            @Html.AntiForgeryToken()
+        </form>
+    }
+    
+    <!-- JavaScript Libraries -->
+    <!-- jQuery - Required for AJAX operations -->
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    
+    <!-- Bootstrap 5.3 JavaScript - Loaded from CDN -->
+    <!-- Required for Bootstrap components like dropdown, modal, collapse -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    
+    <!-- Site JavaScript - Custom scripts -->
+    <!-- asp-append-version: Cache busting -->
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    
+    <!-- Page-specific scripts -->
+    <!-- Each view renders its own Scripts section content here -->
+    <!-- required: false - Scripts section is optional -->
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
+

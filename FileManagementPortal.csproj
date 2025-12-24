@@ -1,0 +1,44 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>aspnet-FileManagementPortal-933662ed-83d1-4e31-9976-b0b9b4e99047</UserSecretsId>
+    <PublishSingleFile>false</PublishSingleFile>
+    <SelfContained>false</SelfContained>
+    <!-- Antivirüs uyarılarını azaltmak için build optimizasyonları -->
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+    <AssemblyTitle>File Management Portal</AssemblyTitle>
+    <AssemblyDescription>Educational file management portal application</AssemblyDescription>
+    <AssemblyProduct>File Management Portal</AssemblyProduct>
+    <AssemblyCopyright>Copyright © 2025</AssemblyCopyright>
+  </PropertyGroup>
+
+  <!-- Create .exe in Debug mode (to prevent Visual Studio issues) -->
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+    <UseAppHost>false</UseAppHost>
+  </PropertyGroup>
+
+  <!-- Create .exe in Release mode -->
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <UseAppHost>true</UseAppHost>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- ASP.NET IDENTITY - ÜYELİK SİSTEMİ PAKETLERİ -->
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="7.0.20" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="7.0.20" />
+    <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="7.0.20" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.20" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="7.0.20" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Areas\Identity\**\*.cs" />
+    <Content Remove="Areas\Identity\**\*" />
+    <None Remove="Areas\Identity\**\*" />
+  </ItemGroup>
+
+</Project>
+    

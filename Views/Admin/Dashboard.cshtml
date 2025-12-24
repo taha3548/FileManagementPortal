@@ -1,0 +1,309 @@
+<!-- ============================================ -->
+<!-- ADMIN DASHBOARD - Yönetim Paneli Ana Sayfa -->
+<!-- Bootstrap 5 responsive tasarım -->
+<!-- SignalR canlı bildirimler -->
+<!-- İstatistik kartları ve aktivite takibi -->
+<!-- ============================================ -->
+@model FileManagementPortal.ViewModels.AdminDashboardViewModel
+@{
+    ViewData["Title"] = "Yönetim Paneli";
+}
+
+<div class="row mb-4">
+    <div class="col-12">
+        <h2><i class="bi bi-speedometer2 me-2"></i>Yönetim Paneli</h2>
+        <div class="mt-2">
+            <span id="adminStatus" class="badge bg-success">Bağlı</span>
+            <span id="connectedAdmins" class="badge bg-primary ms-2">Çevrimiçi Yöneticiler: 0</span>
+            <span id="onlineUsersCount" class="badge bg-info ms-2">
+                <i class="bi bi-circle-fill" style="font-size: 0.6rem;"></i>
+                Çevrimiçi Kullanıcılar: <span id="onlineCount">0</span>
+            </span>
+            <span class="badge bg-info ms-2">Toplam Kullanıcı: @Model.TotalUserCount</span>
+        </div>
+    </div>
+</div>
+
+<!-- SignalR canlı aktivite bildirimleri -->
+<!-- Gerçek zamanlı bildirimler için SignalR Hub bağlantısı -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow-sm border-0">
+            <div class="card-header text-white" style="background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);">
+                <h5 class="mb-0"><i class="bi bi-lightning-fill me-2"></i>Canlı Aktiviteler</h5>
+            </div>
+            <div class="card-body" style="max-height: 300px; overflow-y: auto;">
+                <div id="activityFeed" class="list-group list-group-flush">
+                    <p class="text-muted mb-0">Aktivite bekleniyor...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- İstatistik kartları -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="stats-card" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 1.5rem;">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="card-subtitle mb-2" style="color: #000000 !important;">Toplam Dosya</h6>
+                    <h3 class="mb-0 fw-bold" style="color: #000000 !important;">@Model.TotalFileCount</h3>
+                </div>
+                <i class="bi bi-files fs-1" style="color: #000000 !important; opacity: 0.5;"></i>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="stats-card" style="background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); padding: 1.5rem;">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="card-subtitle mb-2" style="color: #000000 !important;">Toplam Kategori</h6>
+                    <h3 class="mb-0 fw-bold" style="color: #000000 !important;">@Model.TotalCategoryCount</h3>
+                </div>
+                <i class="bi bi-tags fs-1" style="color: #000000 !important; opacity: 0.5;"></i>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="stats-card" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); padding: 1.5rem;">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="card-subtitle mb-2" style="color: #000000 !important;">Toplam Boyut</h6>
+                    <h3 class="mb-0 fw-bold" style="color: #000000 !important;">@((Model.TotalFileSize / 1024.0 / 1024.0).ToString("F2")) MB</h3>
+                </div>
+                <i class="bi bi-hdd fs-1" style="color: #000000 !important; opacity: 0.5;"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-6">
+        <div class="stats-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); padding: 1.5rem;">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="card-subtitle mb-2" style="color: #000000 !important;">Toplam Kullanıcı</h6>
+                    <h3 class="mb-0 fw-bold" style="color: #000000 !important;">@Model.TotalUserCount</h3>
+                </div>
+                <i class="bi bi-people fs-1" style="color: #000000 !important; opacity: 0.5;"></i>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="stats-card" style="background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%); padding: 1.5rem;">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="card-subtitle mb-2" style="color: #000000 !important;">Toplam Yönetici</h6>
+                    <h3 class="mb-0 fw-bold" style="color: #000000 !important;">@Model.TotalAdminCount</h3>
+                </div>
+                <i class="bi bi-shield-check fs-1" style="color: #000000 !important; opacity: 0.5;"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Son yüklenen ve en çok indirilen dosyalar -->
+<div class="row g-3">
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0">
+            <div class="card-header text-white" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Son Yüklenen Dosyalar</h5>
+            </div>
+            <div class="card-body">
+                @if (Model.RecentlyUploadedFiles != null && Model.RecentlyUploadedFiles.Any())
+                {
+                    <div class="list-group list-group-flush">
+                        @foreach (var file in Model.RecentlyUploadedFiles)
+                        {
+                            <div class="list-group-item px-0">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1">@file.FileName</h6>
+                                        <small class="text-muted">@file.UploadedAt.ToString("dd.MM.yyyy HH:mm")</small>
+                                    </div>
+                                    <a href="@Url.Action("Edit", "File", new { id = file.Id })" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted mb-0">Henüz dosya yok.</p>
+                }
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0">
+            <div class="card-header text-white" style="background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);">
+                <h5 class="mb-0"><i class="bi bi-trophy me-2"></i>En Çok İndirilen Dosyalar</h5>
+            </div>
+            <div class="card-body">
+                @if (Model.MostDownloadedFiles != null && Model.MostDownloadedFiles.Any())
+                {
+                    <div class="list-group list-group-flush">
+                        @foreach (var file in Model.MostDownloadedFiles)
+                        {
+                            <div class="list-group-item px-0">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1">@file.FileName</h6>
+                                        <small class="text-success fw-bold">
+                                            <i class="bi bi-download me-1"></i>@file.DownloadCount indirme
+                                        </small>
+                                    </div>
+                                    <a href="@Url.Action("Edit", "File", new { id = file.Id })" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted mb-0">Henüz indirme yok.</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Hızlı erişim butonları -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="d-flex gap-2 flex-wrap">
+            <a asp-action="Files" class="btn btn-primary">
+                <i class="bi bi-files me-2"></i>Tüm Dosyaları Yönet
+            </a>
+            <a asp-action="Categories" class="btn btn-success">
+                <i class="bi bi-tags me-2"></i>Kategorileri Yönet
+            </a>
+            <a asp-action="Users" class="btn btn-success">
+                <i class="bi bi-people me-2"></i>Kullanıcıları Yönet
+            </a>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <!-- SignalR kütüphanesi -->
+    <script src="~/lib/signalr/signalr.js"></script>
+    <script>
+        // SignalR bağlantısı - Admin Hub
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/hubs/admin")
+            .withAutomaticReconnect()
+            .build();
+
+        connection.start().catch(err => console.error('SignalR hatası:', err));
+
+        // SignalR bağlantısı - User Hub (Çevrimiçi kullanıcı takibi)
+        const userConnection = new signalR.HubConnectionBuilder()
+            .withUrl("/hubs/user")
+            .withAutomaticReconnect()
+            .build();
+
+        userConnection.start()
+            .then(() => {
+                console.log('User Hub bağlantısı kuruldu');
+                // İlk bağlantıda çevrimiçi kullanıcıları al
+                userConnection.invoke("GetOnlineUsers").catch(err => console.error(err));
+            })
+            .catch(err => console.error('User Hub hatası:', err));
+
+        // Kullanıcı bağlandığında
+        userConnection.on("UserConnected", (userId, onlineUserIds) => {
+            updateOnlineCount(onlineUserIds.length);
+        });
+
+        // Kullanıcı ayrıldığında
+        userConnection.on("UserDisconnected", (userId, onlineUserIds) => {
+            updateOnlineCount(onlineUserIds.length);
+        });
+
+        // Çevrimiçi kullanıcı listesi geldiğinde
+        userConnection.on("OnlineUsers", (onlineUserIds) => {
+            updateOnlineCount(onlineUserIds.length);
+        });
+
+        // Çevrimiçi kullanıcı sayısını güncelle
+        function updateOnlineCount(count) {
+            document.getElementById('onlineCount').textContent = count;
+        }
+
+        // Sunucudan gelen bildirimler - Gerçek zamanlı
+        connection.on("AdminConnected", (adminId, count) => {
+            document.getElementById('connectedAdmins').textContent = `Bağlı Yöneticiler: ${count}`;
+            addActivityFeed(`Yönetici bağlandı`, 'info');
+        });
+
+        connection.on("AdminDisconnected", (count) => {
+            document.getElementById('connectedAdmins').textContent = `Bağlı Yöneticiler: ${count}`;
+            addActivityFeed(`Yönetici bağlantısı kesildi`, 'warning');
+        });
+
+        connection.on("FileUploaded", (data) => {
+            addActivityFeed(`📤 ${data.FileName} yüklendi`, 'success');
+        });
+
+        connection.on("FileDownloaded", (data) => {
+            addActivityFeed(`📥 ${data.FileName} indirildi`, 'info');
+        });
+
+        connection.on("FileDeleted", (data) => {
+            addActivityFeed(`🗑️ ${data.FileName} silindi`, 'danger');
+        });
+
+        connection.on("UserRegistered", (data) => {
+            addActivityFeed(`👤 Yeni kullanıcı: ${data.UserEmail}`, 'success');
+        });
+
+        // Aktivite listesine mesaj ekle - DOM manipülasyonu
+        function addActivityFeed(message, type) {
+            const feed = document.getElementById('activityFeed');
+            const item = document.createElement('div');
+            item.className = `list-group-item px-0 border-bottom`;
+            item.innerHTML = `
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <p class="mb-1">${message}</p>
+                        <small class="text-muted">${new Date().toLocaleTimeString('tr-TR')}</small>
+                    </div>
+                    <span class="badge bg-${type}">Yeni</span>
+                </div>
+            `;
+            feed.insertBefore(item, feed.firstChild);
+            while (feed.children.length > 10) {
+                feed.removeChild(feed.lastChild);
+            }
+        }
+
+        connection.invoke("GetConnectedAdminsCount").catch(err => console.error(err));
+
+        // Bağlantı durumu kontrolü
+        connection.onreconnecting(() => {
+            document.getElementById('adminStatus').textContent = 'Yeniden bağlanıyor...';
+            document.getElementById('adminStatus').className = 'badge bg-warning';
+        });
+
+        connection.onreconnected(() => {
+            document.getElementById('adminStatus').textContent = 'Bağlı';
+            document.getElementById('adminStatus').className = 'badge bg-success';
+        });
+
+        connection.onclose(() => {
+            document.getElementById('adminStatus').textContent = 'Bağlantı Kesildi';
+            document.getElementById('adminStatus').className = 'badge bg-danger';
+        });
+    </script>
+}

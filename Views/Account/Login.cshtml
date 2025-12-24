@@ -1,0 +1,96 @@
+@model FileManagementPortal.ViewModels.LoginViewModel
+@{
+    ViewData["Title"] = "Giriş Yap";
+    ViewData["HideLayoutAlerts"] = true;
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow-sm mt-4">
+            <div class="card-body">
+                <h4 class="card-title mb-3">Giriş Yap</h4>
+                
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="bi bi-check-circle me-2"></i>@TempData["SuccessMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Kapat"></button>
+                    </div>
+                }
+                
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="alert alert-danger">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                        {
+                            <span>@error.ErrorMessage</span>
+                        }
+                    </div>
+                }
+                
+                <form asp-action="Login" method="post">
+                    <input type="hidden" asp-for="ReturnUrl" />
+                    <div class="mb-3">
+                        <label asp-for="Email" class="form-label">E-posta</label>
+                        <input asp-for="Email" class="form-control" placeholder="ornek@email.com" />
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Password" class="form-label">Şifre</label>
+                        <input asp-for="Password" class="form-control" placeholder="••••••" />
+                    </div>
+                    <div class="mb-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <input type="hidden" name="RememberMe" id="RememberMeValue" value="true" />
+                            <div id="RememberMeBox" style="width: 22px; height: 22px; border: 2px solid #10b981; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; background-color: #10b981; transition: all 0.15s ease;">
+                                <svg id="RememberMeCheck" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                            </div>
+                            <label id="RememberMeLabel" style="cursor: pointer; user-select: none; font-weight: 600; color: #1e293b; margin: 0;">Beni Hatırla</label>
+                        </div>
+                        <script>
+                            (function() {
+                                var box = document.getElementById('RememberMeBox');
+                                var check = document.getElementById('RememberMeCheck');
+                                var value = document.getElementById('RememberMeValue');
+                                var label = document.getElementById('RememberMeLabel');
+                                
+                                function toggle() {
+                                    if (value.value === 'true') {
+                                        value.value = 'false';
+                                        box.style.backgroundColor = '#ffffff';
+                                        box.style.borderColor = '#6b7280';
+                                        check.style.display = 'none';
+                                    } else {
+                                        value.value = 'true';
+                                        box.style.backgroundColor = '#10b981';
+                                        box.style.borderColor = '#10b981';
+                                        check.style.display = 'block';
+                                    }
+                                }
+                                
+                                box.addEventListener('click', toggle);
+                                label.addEventListener('click', toggle);
+                            })();
+                        </script>
+                    </div>
+                    <button type="submit" class="btn btn-success w-100">Giriş Yap</button>
+                </form>
+                <div class="mt-3 text-center">
+                    <p>Hesabınız yok mu? <a asp-action="Register">Kayıt Olun</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+
+
+
+
+
+

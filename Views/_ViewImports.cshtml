@@ -1,0 +1,13 @@
+@* ViewImports.cshtml - Tüm view'lar için ortak using direktifleri ve tag helper'lar *@
+@* Bu dosya Views klasörünün kökünde olduğu için tüm view'lar için geçerlidir *@
+@* Her view'da bu using'leri tekrar yazmaya gerek kalmaz *@
+
+@* Ana namespace - Controller'lar ve diğer sınıflar için *@
+@using FileManagementPortal
+
+@* Models namespace - Entity'ler ve ViewModel'ler için *@
+@using FileManagementPortal.Models
+
+@* ASP.NET Core Tag Helpers - asp-controller, asp-action, asp-for gibi tag helper'lar için *@
+@* Tag helper'lar HTML elementlerine server-side özellikler ekler *@
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers

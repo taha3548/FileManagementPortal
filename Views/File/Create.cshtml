@@ -1,0 +1,58 @@
+@model FileManagementPortal.ViewModels.FileViewModel
+@{
+    ViewData["Title"] = "Dosya Yükle";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h3 class="mb-0"><i class="bi bi-cloud-upload me-2"></i>Dosya Yükle</h3>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label for="FileName" class="form-label">Dosya Adı</label>
+                            <input type="text" class="form-control" id="FileName" name="FileName" required />
+                            <span class="text-danger">@Html.ValidationMessage("FileName")</span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="Description" class="form-label">Açıklama</label>
+                            <textarea class="form-control" id="Description" name="Description" rows="3"></textarea>
+                            <span class="text-danger">@Html.ValidationMessage("Description")</span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="CategoryIds" class="form-label">Kategoriler</label>
+                            <select class="form-select" id="CategoryIds" name="CategoryIds" multiple required>
+                                @if (Model.Categories != null)
+                                {
+                                    @foreach (var category in Model.Categories)
+                                    {
+                                        <option value="@category.Id">@category.Name</option>
+                                    }
+                                }
+                            </select>
+                            <span class="text-danger">@Html.ValidationMessage("CategoryIds")</span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="File" class="form-label">Dosya Seç</label>
+                            <input type="file" class="form-control" id="File" name="File" required />
+                            <span class="text-danger">@Html.ValidationMessage("File")</span>
+                        </div>
+
+                        <div class="mb-3">
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-cloud-upload me-2"></i>Yükle
+                            </button>
+                            <a href="@Url.Action("Index")" class="btn btn-secondary">İptal</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

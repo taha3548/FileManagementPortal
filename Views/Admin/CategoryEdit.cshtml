@@ -1,0 +1,78 @@
+@model FileManagementPortal.ViewModels.CategoryViewModel
+@{
+    ViewData["Title"] = "Kategori Düzenle";
+}
+
+<!-- Admin Category Edit Page -->
+<!-- AdminController.EditCategory (GET) action sends a CategoryViewModel filled with existing category info to this view -->
+<!-- Admin uses this form to update category information -->
+<!-- [Authorize(Roles = "Admin")] allows only admin users to access -->
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0">
+            <!-- Form header -->
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="bi bi-pencil me-2"></i>Kategori Düzenle</h4>
+            </div>
+            <div class="card-body">
+                <!-- Category edit form -->
+                <!-- asp-action="EditCategory": POST operation goes to AdminController.EditCategory action -->
+                <form asp-action="EditCategory" method="post">
+                    <!-- Category ID - hidden input (required for form submit) -->
+                    <!-- AdminController.EditCategory (POST) action uses id to find the category -->
+                    <input type="hidden" asp-for="Id" />
+                    
+                    <!-- Model validation errors (ModelOnly: general errors, not property errors) -->
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+                    
+                    <!-- Category name input field -->
+                    <!-- Bound to CategoryViewModel.Name property -->
+                    <!-- AdminController.EditCategory (GET) action fills it with existing category name -->
+                    <!-- Required validation: [Required] attribute in CategoryViewModel -->
+                    <div class="mb-3">
+                        <label asp-for="Name" class="form-label">Kategori Adı</label>
+                        <input asp-for="Name" class="form-control" />
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+                    
+                    <!-- Category description textarea field -->
+                    <!-- Bound to CategoryViewModel.Description property -->
+                    <!-- AdminController.EditCategory (GET) action fills it with existing category description -->
+                    <!-- Optional field, can be left empty -->
+                    <div class="mb-3">
+                        <label asp-for="Description" class="form-label">Açıklama</label>
+                        <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </div>
+                    
+                    <!-- Active/Inactive status checkbox -->
+                    <!-- Bound to CategoryViewModel.IsActive property -->
+                    <!-- AdminController.EditCategory (GET) action fills it with existing category status -->
+                    <!-- Inactive categories are not shown in file upload forms -->
+                    <div class="mb-3 form-check">
+                        <input asp-for="IsActive" class="form-check-input" type="checkbox" />
+                        <label asp-for="IsActive" class="form-check-label">Aktif</label>
+                    </div>
+                    
+                    <!-- Form buttons -->
+                    <div class="d-flex gap-2">
+                        <!-- Form submit button -->
+                        <!-- Sends to AdminController.EditCategory (POST) action -->
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save me-2"></i>Kaydet
+                        </button>
+                        <!-- Cancel button - Returns to category list page -->
+                        <a asp-action="Categories" class="btn btn-secondary">
+                            <i class="bi bi-x-circle me-2"></i>İptal
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

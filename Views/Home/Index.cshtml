@@ -1,0 +1,210 @@
+@{
+    ViewData["Title"] = "Anasayfa";
+}
+
+<!-- Hero Section - Apple Style -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card border-0 hero-section">
+            <!-- Particles Container -->
+            <div id="particles-js"></div>
+            <div class="card-body text-center">
+                <!-- Main title -->
+                <h1 class="mb-4">
+                    <i class="bi bi-cloud-upload-fill"></i><br>
+                    Dosya Yönetim Portalı
+                </h1>
+                <p class="mb-4">Dosyalarınızı güvenle yükleyin, yönetin ve paylaşın.</p>
+                
+                @if (User.Identity?.IsAuthenticated != true)
+                {
+                    <div class="d-flex justify-content-center gap-3 flex-wrap">
+                        <a asp-controller="Account" asp-action="Register" class="btn btn-primary btn-lg">
+                            <i class="bi bi-person-plus"></i> Hemen Başla
+                        </a>
+                        <a asp-controller="Account" asp-action="Login" class="btn btn-outline-light btn-lg">
+                            <i class="bi bi-box-arrow-in-right"></i> Giriş Yap
+                        </a>
+                    </div>
+                }
+                else
+                {
+                    <div class="d-flex justify-content-center gap-3 flex-wrap">
+                        <a asp-controller="File" asp-action="Create" class="btn btn-primary btn-lg">
+                            <i class="bi bi-upload"></i> Dosya Yükle
+                        </a>
+                        <a asp-controller="File" asp-action="Index" class="btn btn-outline-light btn-lg">
+                            <i class="bi bi-files"></i> Dosyalarım
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Son yüklenen dosyalar bölümü -->
+@if (ViewBag.RecentlyUploadedFiles != null && ((IEnumerable<dynamic>)ViewBag.RecentlyUploadedFiles).Any())
+{
+    <div class="row mb-5">
+        <div class="col-12">
+            <h3 class="section-title"><i class="bi bi-clock-history"></i> Son Yüklenen Dosyalar</h3>
+            <div class="row g-4">
+                @foreach (var dosya in ViewBag.RecentlyUploadedFiles)
+                {
+                    <div class="col-md-6 col-lg-3">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <div class="text-center mb-3">
+                                    <i class="bi bi-file-earmark-fill" style="font-size: 2.5rem; color: var(--accent-blue);"></i>
+                                </div>
+                                <h6 class="card-title text-truncate text-center" title="@dosya.FileName">@dosya.FileName</h6>
+                                <p class="card-text text-center small">
+                                    <span class="text-muted">@dosya.FileType</span><br>
+                                    <span class="text-muted"><i class="bi bi-calendar"></i> @dosya.UploadedAt.ToString("dd.MM.yyyy")</span>
+                                </p>
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <small class="text-muted">
+                                        <i class="bi bi-download"></i> @dosya.DownloadCount
+                                    </small>
+                                    <a href="@Url.Action("Details", "File", new { id = dosya.Id })" class="btn btn-sm btn-primary">
+                                        <i class="bi bi-eye"></i> Detay
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+<!-- En çok indirilen dosyalar bölümü -->
+@if (ViewBag.MostDownloadedFiles != null && ((IEnumerable<dynamic>)ViewBag.MostDownloadedFiles).Any())
+{
+    <div class="row mb-5">
+        <div class="col-12">
+            <h3 class="section-title"><i class="bi bi-trophy"></i> En Çok İndirilen Dosyalar</h3>
+            <div class="row g-4">
+                @foreach (var dosya in ViewBag.MostDownloadedFiles)
+                {
+                    <div class="col-md-6 col-lg-3">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <div class="text-center mb-3">
+                                    <i class="bi bi-file-earmark-fill" style="font-size: 2.5rem; color: var(--accent-orange);"></i>
+                                </div>
+                                <h6 class="card-title text-truncate text-center" title="@dosya.FileName">@dosya.FileName</h6>
+                                <p class="card-text text-center small">
+                                    <span class="text-muted">@dosya.FileType</span><br>
+                                    <span class="text-muted"><i class="bi bi-calendar"></i> @dosya.UploadedAt.ToString("dd.MM.yyyy")</span>
+                                </p>
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <small style="color: var(--accent-green);">
+                                        <i class="bi bi-download"></i> @dosya.DownloadCount indirme
+                                    </small>
+                                    <a href="@Url.Action("Details", "File", new { id = dosya.Id })" class="btn btn-sm btn-primary">
+                                        <i class="bi bi-eye"></i> Detay
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+
+@section Scripts {
+    <!-- Particles.js Library -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script>
+        // Particles.js Configuration
+        document.addEventListener('DOMContentLoaded', function() {
+            if (document.getElementById('particles-js')) {
+                particlesJS('particles-js', {
+                    "particles": {
+                        "number": {
+                            "value": 60,
+                            "density": {
+                                "enable": true,
+                                "value_area": 800
+                            }
+                        },
+                        "color": {
+                            "value": "#ffffff"
+                        },
+                        "shape": {
+                            "type": "circle"
+                        },
+                        "opacity": {
+                            "value": 0.6,
+                            "random": true,
+                            "anim": {
+                                "enable": true,
+                                "speed": 1,
+                                "opacity_min": 0.2,
+                                "sync": false
+                            }
+                        },
+                        "size": {
+                            "value": 4,
+                            "random": true,
+                            "anim": {
+                                "enable": true,
+                                "speed": 3,
+                                "size_min": 1,
+                                "sync": false
+                            }
+                        },
+                        "line_linked": {
+                            "enable": true,
+                            "distance": 150,
+                            "color": "#ffffff",
+                            "opacity": 0.3,
+                            "width": 1
+                        },
+                        "move": {
+                            "enable": true,
+                            "speed": 2,
+                            "direction": "none",
+                            "random": false,
+                            "straight": false,
+                            "out_mode": "out",
+                            "bounce": false
+                        }
+                    },
+                    "interactivity": {
+                        "detect_on": "canvas",
+                        "events": {
+                            "onhover": {
+                                "enable": true,
+                                "mode": "grab"
+                            },
+                            "onclick": {
+                                "enable": true,
+                                "mode": "push"
+                            },
+                            "resize": true
+                        },
+                        "modes": {
+                            "grab": {
+                                "distance": 140,
+                                "line_linked": {
+                                    "opacity": 0.8
+                                }
+                            },
+                            "push": {
+                                "particles_nb": 4
+                            }
+                        }
+                    },
+                    "retina_detect": true
+                });
+            }
+        });
+    </script>
+}

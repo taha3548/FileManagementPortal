@@ -1,0 +1,439 @@
+@model FileManagementPortal.ViewModels.UserDetailViewModel
+@{
+    ViewData["Title"] = "Kullanıcı Detayları";
+    ViewData["HideLayoutAlerts"] = true;
+}
+
+<!-- Admin User Detail Page -->
+<!-- AdminController.UserDetail action sends a UserDetailViewModel to this view -->
+<!-- Admin views user information, files, logs, and password -->
+<!-- [Authorize(Roles = "Admin")] allows only admin users to access -->
+
+<!-- Alert Messages - TempData messages -->
+<!-- Success message (from TempData) -->
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle me-2"></i>@TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Kapat"></button>
+    </div>
+}
+
+<!-- Error message (from TempData) -->
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle me-2"></i>@TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Kapat"></button>
+    </div>
+}
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center">
+            <!-- Page header -->
+            <h2><i class="bi bi-person-circle me-2"></i>Kullanıcı Detayları</h2>
+            <!-- Return to user list page button -->
+            <a asp-action="Users" class="btn btn-secondary">
+                <i class="bi bi-arrow-left me-2"></i>Geri
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- User Information, Statistics and Actions Cards -->
+<div class="row mb-4">
+    <!-- User Information Card -->
+    <div class="col-md-4">
+        <div class="card shadow-lg border-0">
+            <div class="card-header" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.18) 0%, rgba(34, 197, 94, 0.18) 100%);">
+                <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Kullanıcı Bilgileri</h5>
+            </div>
+            <div class="card-body">
+                <!-- Email address -->
+                <p><strong>E-posta:</strong> @Model.Email</p>
+                <!-- Username (optional) -->
+                <p><strong>Kullanıcı Adı:</strong> @(Model.UserName ?? "-")</p>
+                
+                <!-- Email confirmation status -->
+                <p>
+                    <strong>E-posta Doğrulandı:</strong>
+                    @if (Model.EmailConfirmed)
+                    {
+                        <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Evet</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-warning"><i class="bi bi-x-circle me-1"></i>Hayır</span>
+                    }
+                </p>
+                
+                <!-- User roles -->
+                <p><strong>Roller:</strong></p>
+                @if (Model.Roles != null && Model.Roles.Any())
+                {
+                    <!-- Show badge for each role -->
+                    @foreach (var role in Model.Roles)
+                    {
+                        <span class="badge bg-primary me-1">@role</span>
+                    }
+                }
+                else
+                {
+                    <span class="badge bg-secondary">Rol Yok</span>
+                }
+                
+                <!-- User password (if can view) -->
+                @if (Model.CanViewPassword && !string.IsNullOrEmpty(Model.PlainPassword))
+                {
+                    <p class="mt-3">
+                        <strong>Şifre:</strong> 
+                        <span id="passwordDisplay" class="text-muted">••••••••</span>
+                        <button type="button" class="btn btn-sm btn-outline-secondary ms-2" onclick="togglePassword()">
+                            <i class="bi bi-eye" id="passwordIcon"></i>
+                        </button>
+                        <span id="actualPassword" style="display:none;">@Model.PlainPassword</span>
+                    </p>
+                }
+            </div>
+        </div>
+    </div>
+    
+    <!-- Statistics Card -->
+    <!-- Statistics calculated in AdminController.UserDetail action -->
+    <div class="col-md-4">
+        <div class="card shadow-lg border-0">
+            <div class="card-header" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.18) 0%, rgba(34, 197, 94, 0.18) 100%);">
+                <h5 class="mb-0"><i class="bi bi-bar-chart me-2"></i>İstatistikler</h5>
+            </div>
+            <div class="card-body">
+                <!-- Total file count - Number of files uploaded by user -->
+                <p><strong>Toplam Dosya:</strong> <span class="badge bg-info">@Model.TotalFileCount</span></p>
+                <!-- Total file size - Converted from Bytes to MB -->
+                <p><strong>Toplam Dosya Boyutu:</strong> <span class="badge bg-info">@((Model.TotalFileSize / 1024.0 / 1024.0).ToString("F2")) MB</span></p>
+                <!-- Total log records - User activity log count (last 50) -->
+                <p><strong>Toplam Log Kaydı:</strong> <span class="badge bg-info">@Model.Logs.Count</span></p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Actions Card -->
+    <!-- Operations that can be performed on user -->
+    <div class="col-md-4">
+        <div class="card shadow-lg border-0">
+            <div class="card-header" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.18) 0%, rgba(34, 197, 94, 0.18) 100%);">
+                <h5 class="mb-0"><i class="bi bi-gear me-2"></i>İşlemler</h5>
+            </div>
+            <div class="card-body">
+                @{
+                    // Permission checks - determines which operations can be performed
+                    var isSuperAdmin = Model.Email?.ToLower() == "admin@gmail.com"; // Is super admin?
+                    var isTargetUserAdmin = Model.Roles != null && Model.Roles.Contains("Admin"); // Is target user admin?
+                    var isTargetUserUser = Model.Roles != null && Model.Roles.Contains("User"); // Is target user user?
+                    var currentUserIsSuperAdmin = User.Identity?.Name?.ToLower() == "admin@gmail.com"; // Is current user super admin?
+                    // Change password permission: Not super admin and (target user not admin or current user is super admin)
+                    var canChangePassword = !isSuperAdmin && (!isTargetUserAdmin || currentUserIsSuperAdmin);
+                }
+                
+                <!-- Role Management - Only super admin can manage roles -->
+                @if (currentUserIsSuperAdmin && !isSuperAdmin)
+                {
+                    <!-- Admin Role -->
+                    @if (isTargetUserAdmin)
+                    {
+                        <button type="button" class="btn btn-danger w-100 mb-2" onclick="removeRole('Admin', '@Model.Id')">
+                            <i class="bi bi-shield-x me-2"></i>Admin Rolünü Kaldır
+                        </button>
+                    }
+                    else
+                    {
+                        <button type="button" class="btn btn-success w-100 mb-2" onclick="addRole('Admin', '@Model.Id')">
+                            <i class="bi bi-shield-check me-2"></i>Admin Rolü Ver
+                        </button>
+                    }
+
+                    <!-- User Role -->
+                    @if (isTargetUserUser)
+                    {
+                        <button type="button" class="btn btn-warning w-100 mb-2" onclick="removeRole('User', '@Model.Id')">
+                            <i class="bi bi-person-x me-2"></i>User Rolünü Kaldır
+                        </button>
+                    }
+                    else
+                    {
+                        <button type="button" class="btn btn-info w-100 mb-2" onclick="addRole('User', '@Model.Id')">
+                            <i class="bi bi-person-check me-2"></i>User Rolü Ver
+                        </button>
+                    }
+                }
+                else if (!currentUserIsSuperAdmin && isTargetUserAdmin)
+                {
+                    <!-- Regular admin cannot manage other admins -->
+                    <button type="button" class="btn btn-secondary w-100 mb-2" disabled title="Diğer adminleri yönetemezsiniz">
+                        <i class="bi bi-shield-lock me-2"></i>Rol Yönetimi Kısıtlı
+                    </button>
+                }
+                
+                <!-- Change password button - Shown based on permission check -->
+                @if (canChangePassword)
+                {
+                    <!-- Has permission to change password -->
+                    <a asp-action="ChangeUserPassword" asp-route-id="@Model.Id" class="btn btn-primary w-100 mb-2">
+                        <i class="bi bi-key me-2"></i>Şifre Değiştir
+                    </a>
+                }
+                else
+                {
+                    <!-- No permission to change password -->
+                    <button type="button" class="btn btn-primary w-100 mb-2" disabled title="@(isSuperAdmin ? "Super admin şifresi değiştirilemez" : "Diğer admin şifrelerini değiştirme izniniz yok")">
+                        <i class="bi bi-key me-2"></i>Şifre Değiştir
+                    </button>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- User Uploaded Files List -->
+<!-- AdminController.UserDetail action retrieves all user files -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow-lg border-0">
+            <div class="card-header" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.18) 0%, rgba(34, 197, 94, 0.18) 100%);">
+                <h5 class="mb-0"><i class="bi bi-files me-2"></i>Yüklenen Dosyalar</h5>
+            </div>
+            <div class="card-body">
+                <!-- Show table if file list exists -->
+                @if (Model.Files != null && Model.Files.Any())
+                {
+                    <!-- Responsive table - horizontal scroll on mobile -->
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Dosya Adı</th>
+                                    <th>Kategoriler</th>
+                                    <th>Boyut</th>
+                                    <th>Yükleme Tarihi</th>
+                                    <th>İndirme Sayısı</th>
+                                    <th>Durum</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Create row for each file -->
+                                <!-- AdminController.UserDetail action loads categories with Include(f => f.Categories) -->
+                                @foreach (var file in Model.Files)
+                                {
+                                    <tr>
+                                        <!-- File name and type -->
+                                        <td>
+                                            <strong>@file.FileName</strong>
+                                            <br>
+                                            <small class="text-muted">@file.FileType</small>
+                                        </td>
+                                        
+                                        <!-- Categories - Many-to-many relationship -->
+                                        <td>
+                                            @if (file.Categories != null && file.Categories.Any())
+                                            {
+                                                @foreach (var category in file.Categories)
+                                                {
+                                                    <span class="badge bg-secondary me-1">@category.Name</span>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">-</span>
+                                            }
+                                        </td>
+                                        
+                                        <!-- File size - Converted from Bytes to KB -->
+                                        <td>@((file.FileSize / 1024.0).ToString("F2")) KB</td>
+                                        
+                                        <!-- Upload date - Date format -->
+                                        <td>@file.UploadedAt.ToString("dd.MM.yyyy HH:mm")</td>
+                                        
+                                        <!-- Download count -->
+                                        <td><span class="badge bg-info">@file.DownloadCount</span></td>
+                                        
+                                        <!-- Active/Inactive status -->
+                                        <td>
+                                            @if (file.IsActive)
+                                            {
+                                                <span class="badge bg-success">Aktif</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-danger">Pasif</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <!-- Info message if no files -->
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>Bu kullanıcı henüz dosya yüklememiş.
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- User Activity Logs -->
+<!-- AdminController.UserDetail action retrieves last 50 log records -->
+<!-- Log records created with LogService.LogAsync() -->
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow-lg border-0">
+            <div class="card-header" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.18) 0%, rgba(34, 197, 94, 0.18) 100%);">
+                <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Aktivite Günlüğü (Son 50)</h5>
+            </div>
+            <div class="card-body">
+                <!-- Show table if log list exists -->
+                @if (Model.Logs != null && Model.Logs.Any())
+                {
+                    <!-- Responsive table - horizontal scroll on mobile -->
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Tarih</th>
+                                    <th>Aktivite Türü</th>
+                                    <th>Açıklama</th>
+                                    <th>İlgili Dosya</th>
+                                    <th>IP Adresi</th>
+                                    <th>Durum</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Create row for each log -->
+                                <!-- Logs are sorted by date (OrderByDescending) -->
+                                @foreach (var log in Model.Logs)
+                                {
+                                    <tr>
+                                        <!-- Log date - Date format (with seconds) -->
+                                        <td>@log.Date.ToString("dd.MM.yyyy HH:mm:ss")</td>
+                                        
+                                        <!-- Activity type - Shown as badge -->
+                                        <!-- Examples: "FileUploaded", "FileDeleted", "FileDownloaded" -->
+                                        <td>
+                                            <span class="badge bg-primary">@log.ActivityType</span>
+                                        </td>
+                                        
+                                        <!-- Log description -->
+                                        <td>@(log.Description ?? "-")</td>
+                                        
+                                        <!-- Related file name (if any) -->
+                                        <td>
+                                            @if (!string.IsNullOrEmpty(log.RelatedFileName))
+                                            {
+                                                <span class="text-muted">@log.RelatedFileName</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">-</span>
+                                            }
+                                        </td>
+                                        
+                                        <!-- IP address (for security and tracking) -->
+                                        <td><small class="text-muted">@(log.IpAddress ?? "-")</small></td>
+                                        
+                                        <!-- Operation success status -->
+                                        <td>
+                                            <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Başarılı</span>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <!-- Info message if no logs -->
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>Bu kullanıcı için henüz günlük kaydı yok.
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        // Toggle password visibility
+        function togglePassword() {
+            var display = document.getElementById('passwordDisplay');
+            var actual = document.getElementById('actualPassword');
+            var icon = document.getElementById('passwordIcon');
+            
+            if (display.textContent === '••••••••') {
+                display.textContent = actual.textContent;
+                icon.className = 'bi bi-eye-slash';
+            } else {
+                display.textContent = '••••••••';
+                icon.className = 'bi bi-eye';
+            }
+        }
+
+        function addRole(roleName, userId) {
+            if (confirm(roleName + ' rolünü vermek istediğinizden emin misiniz?')) {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '@Url.Action("AddAdminRole")'.replace('AddAdminRole', 'Add' + roleName + 'Role');
+                
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'id';
+                input.value = userId;
+                form.appendChild(input);
+                
+                const token = document.querySelector('input[name="__RequestVerificationToken"]');
+                if (token) {
+                    const tokenInput = document.createElement('input');
+                    tokenInput.type = 'hidden';
+                    tokenInput.name = '__RequestVerificationToken';
+                    tokenInput.value = token.value;
+                    form.appendChild(tokenInput);
+                }
+                
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+
+        function removeRole(roleName, userId) {
+            if (confirm(roleName + ' rolünü kaldırmak istediğinizden emin misiniz?')) {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '@Url.Action("RemoveAdminRole")'.replace('RemoveAdminRole', 'Remove' + roleName + 'Role');
+                
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'id';
+                input.value = userId;
+                form.appendChild(input);
+                
+                const token = document.querySelector('input[name="__RequestVerificationToken"]');
+                if (token) {
+                    const tokenInput = document.createElement('input');
+                    tokenInput.type = 'hidden';
+                    tokenInput.name = '__RequestVerificationToken';
+                    tokenInput.value = token.value;
+                    form.appendChild(tokenInput);
+                }
+                
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+    </script>
+}

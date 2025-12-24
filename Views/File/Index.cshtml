@@ -1,0 +1,129 @@
+@model FileManagementPortal.ViewModels.FileListViewModel
+@{
+    ViewData["Title"] = "Dosyalarım";
+}
+
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2><i class="bi bi-files me-2"></i>Dosyalarım</h2>
+        </div>
+    </div>
+
+    <!-- Filter and Search -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <form method="get" class="d-flex gap-2">
+                <select name="categoryId" class="form-select">
+                    <option value="">Tüm Kategoriler</option>
+                    @foreach (var category in Model.Categories)
+                    {
+                        <option value="@category.Id" selected="@(Model.SelectedCategoryId == category.Id)">
+                            @category.Name
+                        </option>
+                    }
+                </select>
+                <button type="submit" class="btn btn-primary">Filtrele</button>
+            </form>
+        </div>
+        <div class="col-md-6">
+            <form method="get" class="d-flex gap-2">
+                <input type="text" name="search" class="form-control" placeholder="Dosya ara..." value="@Model.SearchTerm" />
+                <button type="submit" class="btn btn-primary">Ara</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Upload Button -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <a href="@Url.Action("Create")" class="btn btn-success">
+                <i class="bi bi-cloud-upload me-2"></i>Dosya Yükle
+            </a>
+        </div>
+    </div>
+
+    <!-- Files List -->
+    @if (Model.Files != null && Model.Files.Any())
+    {
+        <div class="row g-3">
+            @foreach (var file in Model.Files)
+            {
+                <div class="col-md-5">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">@file.FileName</h5>
+                            <p class="card-text text-muted">@file.Description</p>
+                            <div class="mb-3">
+                                @if (file.Categories != null && file.Categories.Any())
+                                {
+                                    @foreach (var category in file.Categories)
+                                    {
+                                        <span class="badge bg-info">@category.Name</span>
+                                    }
+                                }
+                            </div>
+                            <small class="text-muted d-block mb-2">
+                                <i class="bi bi-calendar me-1"></i>@file.UploadedAt.ToString("dd.MM.yyyy")
+                            </small>
+                            <small class="text-muted d-block mb-3">
+                                <i class="bi bi-download me-1"></i>@file.DownloadCount indirme
+                            </small>
+                        </div>
+                        <div class="card-footer bg-white border-top" style="white-space: nowrap;">
+                            <a href="@Url.Action("Details", new { id = file.Id })" class="btn btn-sm btn-primary">
+                                <i class="bi bi-eye me-1"></i>Görüntüle
+                            </a>
+                            <a href="@Url.Action("Edit", new { id = file.Id })" class="btn btn-sm btn-warning">
+                                <i class="bi bi-pencil me-1"></i>Düzenle
+                            </a>
+                            <a href="@Url.Action("Download", new { id = file.Id })" class="btn btn-sm btn-success">
+                                <i class="bi bi-download me-1"></i>İndir
+                            </a>
+                            <button type="button" class="btn btn-sm btn-danger" onclick="deleteFile(@file.Id)">
+                                <i class="bi bi-trash me-1"></i>Sil
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle me-2"></i>Dosya bulunamadı.
+        </div>
+    }
+</div>
+
+
+@section Scripts {
+    <script>
+        // AJAX dosya silme fonksiyonu - jQuery kullanımı
+        // FileController.Delete action'ına POST request
+        function deleteFile(id) {
+            // Onay dialog'u
+            if (confirm('Bu dosyayı silmek istediğinize emin misiniz?')) {
+                // AJAX POST request
+                $.ajax({
+                    url: '@Url.Action("Delete", "File")',
+                    type: 'POST',
+                    data: { id: id },
+                    // Başarılı response
+                    success: function (response) {
+                        if (response.success) {
+                            location.reload(); // Sayfayı yenile
+                        } else {
+                            alert(response.message || 'Dosya silinirken bir hata oluştu.');
+                        }
+                    },
+                    // AJAX hatası
+                    error: function () {
+                        alert('Dosya silinirken bir hata oluştu.');
+                    }
+                });
+            }
+        }
+    </script>
+}

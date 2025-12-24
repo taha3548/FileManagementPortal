@@ -1,0 +1,151 @@
+@model IEnumerable<FileManagementPortal.Models.FileItem>
+@{
+    ViewData["Title"] = "Dosya Yönetimi";
+}
+
+<!-- Admin File Management Page -->
+<!-- AdminController.Files action sends a list of all files to this view -->
+<!-- Admin can view, edit, and delete files -->
+<!-- [Authorize(Roles = "Admin")] allows only admin users to access -->
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center">
+            <!-- Page header -->
+            <h2><i class="bi bi-files me-2"></i>Dosya Yönetimi</h2>
+            <div>
+                <!-- Return to dashboard button -->
+                <a asp-action="Dashboard" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left me-2"></i>Panele Dön
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- File list table -->
+<div class="card shadow-sm border-0">
+    <div class="card-body">
+        <!-- Show table if file list exists -->
+        @if (Model != null && Model.Any())
+        {
+            <!-- Responsive table - horizontal scroll on mobile -->
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Dosya Adı</th>
+                            <th>Kategoriler</th>
+                            <th>Boyut</th>
+                            <th>Yükleme Tarihi</th>
+                            <th>İndirme</th>
+                            <th>Durum</th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var file in Model)
+                        {
+                            <tr>
+                                <!-- File name and type -->
+                                <td>
+                                    <strong>@file.FileName</strong>
+                                    <br>
+                                    <small class="text-muted">@file.FileType</small>
+                                </td>
+                                
+                                <!-- Categories -->
+                                <td>
+                                    @if (file.Categories != null && file.Categories.Any())
+                                    {
+                                        @foreach (var category in file.Categories)
+                                        {
+                                            <span class="badge bg-info me-1">@category.Name</span>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                                
+                                <!-- File size - Converted from Bytes to KB -->
+                                <td>@((file.FileSize / 1024.0).ToString("F2")) KB</td>
+                                
+                                <!-- Upload date -->
+                                <td>@file.UploadedAt.ToString("dd.MM.yyyy HH:mm")</td>
+                                
+                                <!-- Download count -->
+                                <td><span class="badge bg-success">@file.DownloadCount</span></td>
+                                
+                                <!-- Active/Inactive status -->
+                                <td>
+                                    <span class="badge @(file.IsActive ? "bg-success" : "bg-danger")">
+                                        @(file.IsActive ? "Aktif" : "Pasif")
+                                    </span>
+                                </td>
+                                
+                                <!-- Action buttons -->
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <!-- View details button -->
+                                        <a href="@Url.Action("Details", "File", new { id = file.Id })" class="btn btn-outline-info" title="Görüntüle">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        
+                                        <!-- Edit button -->
+                                        <a href="@Url.Action("Edit", "File", new { id = file.Id })" class="btn btn-outline-warning" title="Düzenle">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        
+                                        <!-- Download button -->
+                                        <a href="@Url.Action("Download", "File", new { id = file.Id })" class="btn btn-outline-success" title="İndir">
+                                            <i class="bi bi-download"></i>
+                                        </a>
+                                        
+                                        <!-- Delete button -->
+                                        <button type="button" class="btn btn-outline-danger" title="Sil" onclick="deleteFile(@file.Id)">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <!-- Info message if no files exist -->
+            <div class="alert alert-info text-center">
+                <i class="bi bi-info-circle me-2"></i>Henüz dosya bulunamadı.
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // AJAX dosya silme fonksiyonu - Sayfa yenilenmeden silme
+        function deleteFile(id) {
+            if (confirm('Bu dosyayı silmek istediğinize emin misiniz?')) {
+                $.ajax({
+                    url: '@Url.Action("Delete", "File")',
+                    type: 'POST',
+                    data: { id: id },
+                    success: function (response) {
+                        if (response.success) {
+                            location.reload();
+                        } else {
+                            alert(response.message || 'Dosya silinirken bir hata oluştu.');
+                        }
+                    },
+                    error: function () {
+                        alert('Dosya silinirken bir hata oluştu.');
+                    }
+                });
+            }
+        }
+    </script>
+}

@@ -1,0 +1,46 @@
+@{
+    ViewData["Title"] = "Gizlilik Politikası";
+}
+
+<!-- Gizlilik Politikası Sayfası -->
+<!-- HomeController.Privacy action'ından bu view render ediliyor -->
+<!-- Kullanıcılara gizlilik politikası bilgileri gösteriliyor -->
+<!-- Herkes erişebilir (authentication gerekmez) -->
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-lg border-0">
+            <!-- Sayfa başlığı -->
+            <div class="card-header text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <h4 class="mb-0"><i class="bi bi-shield-lock me-2"></i>Gizlilik Politikası</h4>
+            </div>
+            <div class="card-body p-4">
+                <!-- Kişisel verilerin korunması bölümü -->
+                <h5>Kişisel Verilerin Korunması</h5>
+                <p>Dosya Yönetim Portalı, kullanıcılarının kişisel verilerinin güvenliğini ve gizliliğini korumayı taahhüt eder.</p>
+                
+                <!-- Toplanan bilgiler bölümü -->
+                <h5 class="mt-4">Toplanan Bilgiler</h5>
+                <p>Hesap oluştururken topladığımız bilgiler:</p>
+                <ul>
+                    <!-- E-posta adresi - Identity UserManager ile kaydediliyor -->
+                    <li>E-posta adresi</li>
+                    <!-- Şifre - Identity PasswordHash ile hash'leniyor (düz metin değil) -->
+                    <!-- NOT: Bu projede PlainPassword alanı var ama bu sadece eğitim amaçlı, production'da kaldırılmalı -->
+                    <li>Şifre (şifrelenmiş olarak saklanır)</li>
+                    <!-- Telefon numarası - Identity User.PhoneNumber property'si -->
+                    <li>Telefon numarası (isteğe bağlı)</li>
+                </ul>
+                
+                <!-- Veri güvenliği bölümü -->
+                <h5 class="mt-4">Veri Güvenliği</h5>
+                <p>Tüm verileriniz güvenli sunucularda saklanır ve şifrelenmiş bağlantılar üzerinden iletilir.</p>
+                
+                <!-- Çerezler bölümü -->
+                <!-- ASP.NET Core Identity cookie-based authentication kullanıyor -->
+                <h5 class="mt-4">Çerezler</h5>
+                <p>Web sitemiz, kullanıcı deneyimini iyileştirmek için çerezler kullanır. Çerezler, tarayıcı ayarlarınızdan yönetilebilir.</p>
+            </div>
+        </div>
+    </div>
+</div>
